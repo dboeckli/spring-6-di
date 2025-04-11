@@ -189,7 +189,7 @@ jobs:
             echo "::notice:: ### Build of Feature Branch ${BRANCH_NAME}. Version: $BRANCH_MVN_VERSION"
             mvn -B versions:set -e -DnewVersion="$BRANCH_MVN_VERSION"
           fi
-          mvn -B -e install -Dskip.start.stop.springboot=true -s $GITHUB_WORKSPACE/settings.xml	
+          mvn -B -e verify -Dskip.start.stop.springboot=true -Dskip.docker.build=true -Dskip.docker.publish=true -s $GITHUB_WORKSPACE/settings.xml	
       
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
@@ -247,3 +247,23 @@ jobs:
                   -Dsonar.branch.target=master
           fi 
         
+  Trigger-Deploy:
+    runs-on: ubuntu-latest
+    needs: [ setup, build ]
+    if: github.event_name != 'pull_request'
+
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+      - name: Trigger Deployment
+        if: success()  # This ensures the step only runs if all previous steps were successful
+        env:
+          GH_TOKEN: ${{ secrets.TRIGGER_WORKFLOW_TOKEN }}
+          BRANCH_MVN_VERSION: ${{needs.setup.outputs.BRANCH_MVN_VERSION}}
+        run: |
+          gh workflow run deploy-and-test-cluster.yml -R ${{ github.repository }} -r ${{ github.ref }} \
+          -f "version=$BRANCH_MVN_VERSION" \
+          -f "deployed-by-build=${{ github.run_id }}" \
+          -f "deployed-by-workflow=${{ github.workflow }}"
