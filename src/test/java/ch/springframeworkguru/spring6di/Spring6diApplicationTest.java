@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(useMainMethod = SpringBootTest.UseMainMethod.ALWAYS)
 @Slf4j
-class Spring6diApplicationTests {
+class Spring6diApplicationTest {
 
     @Autowired
     private ApplicationContext applicationContext;
