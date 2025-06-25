@@ -22,8 +22,6 @@ spec:
           env:
             - name: JAVA_TIMEZONE
               value: "{{ .Values.global.timezone }}"
-            - name: SPRING_PROFILES_ACTIVE
-              value: {{ .Values.spring.profiles.active | default "local" }}
           ports:
             - name: http
               containerPort: {{ .Values.service.targetPort }}
