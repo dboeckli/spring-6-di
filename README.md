@@ -148,8 +148,8 @@ sbx run opencode --name spring-6-di `
     --kit "git+https://github.com/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent" `
     -t docker/sandbox-templates:opencode-docker-0.5.0 `
     "C:\development\projects\spring-6-di" `
-    "$env:USERPROFILE\.kube:ro" `       # optional: Kubernetes (kubectl/helm in Docker Desktop cluster)
-    "C:\development\maven-repo:ro"      # read-only host Maven cache (opencode-sandbox-kit #87)
+    "$env:USERPROFILE\.kube:ro" `
+    "C:\development\maven-repo:ro"
 ```
 
 Claude variant (Home): `sbx run claude --name spring-6-di --static-mcp idea --kit "git+https://github.com/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent" -t docker/sandbox-templates:claude-code-docker-0.5.0 "C:\development\projects\spring-6-di" "C:\development\maven-repo:ro"`
