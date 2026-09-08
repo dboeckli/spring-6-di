@@ -2,16 +2,16 @@
 
 ## Overview
 
-This project is a Spring Boot 3.4.1 web application.
+This project is a Spring Boot 4.1.1 (Spring Framework 6) application — a DI learning project.
 
 ## Prerequisites
 
-- Java 21
+- Java 25
 - Maven 3.x
 
 ## Development
 
-This project uses Spring Boot 3.4.1 and Java 21. It's configured with various plugins and dependencies to support:
+This project uses Spring Boot 4.1.1 and Java 25. It's configured with various plugins and dependencies to support:
 - Actuator for monitoring and managing the application
 - Logbook for HTTP request and response logging
 - Docker image building and publishing
@@ -132,3 +132,27 @@ kubectl run busybox-test --rm -it --image=busybox:1.36 --namespace=spring-6-di -
 ```
 
 You can use the actuator rest call to verify via port 30080
+
+## Sandbox
+
+Development in an isolated Docker sandbox via [opencode-sandbox-kit](https://github.com/dboeckli/opencode-sandbox-kit).
+Prerequisites: `sbx` CLI, secrets (`sbx secret set github` + `sbx secret set github-maven`), IntelliJ-MCP registration
+(`sbx mcp add idea --url http://localhost:64615/stream --skip-ssrf-check`).
+
+Start (PowerShell) — multiline, with `--static-mcp idea`, pinned template version and a read-only host Maven cache
+(no re-download of cached dependencies):
+
+```powershell
+sbx run opencode --name spring-6-di `
+    --static-mcp idea `
+    --kit "git+https://github.com/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent" `
+    -t docker/sandbox-templates:opencode-docker-0.5.0 `
+    "C:\development\projects\spring-6-di" `
+    "$env:USERPROFILE\.kube:ro" `       # optional: Kubernetes (kubectl/helm in Docker Desktop cluster)
+    "C:\development\maven-repo:ro"      # read-only host Maven cache (opencode-sandbox-kit #87)
+```
+
+Claude variant (Home): `sbx run claude --name spring-6-di --static-mcp idea --kit "git+https://github.com/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent" -t docker/sandbox-templates:claude-code-docker-0.5.0 "C:\development\projects\spring-6-di" "C:\development\maven-repo:ro"`
+
+> **Sandbox quirk:** Before any `./mvnw` in the sandbox run `export npm_config_bin_links=false` (Spotless/prettier otherwise fails with EPERM on the mounted workspace).
+
