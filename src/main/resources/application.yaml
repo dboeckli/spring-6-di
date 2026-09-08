@@ -1,7 +1,7 @@
 spring:
   application:
     name: spring6di
-    
+
 management:
   health:
     readinessstate:
@@ -67,4 +67,3 @@ management:
     metrics:
       export:
         enabled: false
-

@@ -27,91 +27,89 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTracing
 class DatasourceRestControllerIT {
 
-    @Autowired
-    MockMvc mockMvc;
+	@Autowired
+	MockMvc mockMvc;
 
-    @Nested
-    @ActiveProfiles("dev")
-    @DisplayName("Profile: Dev")
-    class DevProfileTest {
-        @Test
-        void testGetDatasource() throws Exception {
-            mockMvc.perform(get("/datasource"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("dev"));
-        }
-    }
+	@Nested
+	@ActiveProfiles("dev")
+	@DisplayName("Profile: Dev")
+	class DevProfileTest {
 
-    @Nested
-    @ActiveProfiles("qa")
-    @DisplayName("Profile: QA")
-    class QaProfileTest {
-        @Test
-        void testGetDatasource() throws Exception {
-            mockMvc.perform(get("/datasource"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("qa"));
-        }
-    }
+		@Test
+		void testGetDatasource() throws Exception {
+			mockMvc.perform(get("/datasource")).andExpect(status().isOk()).andExpect(content().string("dev"));
+		}
 
-    @Nested
-    @ActiveProfiles("uat")
-    @DisplayName("Profile: UAT")
-    class UatProfileTest {
-        @Test
-        void testGetDatasource() throws Exception {
-            mockMvc.perform(get("/datasource"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("uat"));
-        }
-    }
+	}
 
-    @Nested
-    @ActiveProfiles("prod")
-    @DisplayName("Profile: Prod")
-    class ProdProfileTest {
-        @Test
-        void testGetDatasource() throws Exception {
-            mockMvc.perform(get("/datasource"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("prod"));
-        }
-    }
+	@Nested
+	@ActiveProfiles("qa")
+	@DisplayName("Profile: QA")
+	class QaProfileTest {
 
-    @Nested
-    @DisplayName("Profile: Default (kein explizites Profil)")
-    class DefaultProfileTest {
-        @Test
-        void testGetDatasource() throws Exception {
-            mockMvc.perform(get("/datasource"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("dev"));
-        }
-    }
+		@Test
+		void testGetDatasource() throws Exception {
+			mockMvc.perform(get("/datasource")).andExpect(status().isOk()).andExpect(content().string("qa"));
+		}
 
-    @Test
-    void test_logsMessage() throws Exception {
-        Logger logger = (Logger) LoggerFactory.getLogger(DatasourceRestController.class);
-        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-        listAppender.start();
-        logger.addAppender(listAppender);
+	}
 
-        mockMvc.perform(get("/datasource"))
-            .andExpect(status().isOk())
-            .andExpect(content().string("dev"));
+	@Nested
+	@ActiveProfiles("uat")
+	@DisplayName("Profile: UAT")
+	class UatProfileTest {
 
-        List<ILoggingEvent> logEvents = listAppender.list;
-        assertAll(
-            () -> assertNotNull(logEvents),
-            () -> assertEquals(1, logEvents.size()),
-            () -> assertThat(logEvents.getFirst().getFormattedMessage()).isEqualTo("Datasource requested"),
-            () -> assertThat(logEvents.getFirst().getMDCPropertyMap().get("traceId")).isNotBlank().matches("[0-9a-f]{32}"),
-            () -> assertThat(logEvents.getFirst().getMDCPropertyMap().get("spanId")).as("span_id").isNotBlank().matches("[0-9a-f]{16}")
-        );
+		@Test
+		void testGetDatasource() throws Exception {
+			mockMvc.perform(get("/datasource")).andExpect(status().isOk()).andExpect(content().string("uat"));
+		}
 
-        logger.detachAppender(listAppender);
-        listAppender.stop();
+	}
 
-    }
+	@Nested
+	@ActiveProfiles("prod")
+	@DisplayName("Profile: Prod")
+	class ProdProfileTest {
+
+		@Test
+		void testGetDatasource() throws Exception {
+			mockMvc.perform(get("/datasource")).andExpect(status().isOk()).andExpect(content().string("prod"));
+		}
+
+	}
+
+	@Nested
+	@DisplayName("Profile: Default (kein explizites Profil)")
+	class DefaultProfileTest {
+
+		@Test
+		void testGetDatasource() throws Exception {
+			mockMvc.perform(get("/datasource")).andExpect(status().isOk()).andExpect(content().string("dev"));
+		}
+
+	}
+
+	@Test
+	void test_logsMessage() throws Exception {
+		Logger logger = (Logger) LoggerFactory.getLogger(DatasourceRestController.class);
+		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+		listAppender.start();
+		logger.addAppender(listAppender);
+
+		mockMvc.perform(get("/datasource")).andExpect(status().isOk()).andExpect(content().string("dev"));
+
+		List<ILoggingEvent> logEvents = listAppender.list;
+		assertAll(() -> assertNotNull(logEvents), () -> assertEquals(1, logEvents.size()),
+				() -> assertThat(logEvents.getFirst().getFormattedMessage()).isEqualTo("Datasource requested"),
+				() -> assertThat(logEvents.getFirst().getMDCPropertyMap().get("traceId")).isNotBlank()
+					.matches("[0-9a-f]{32}"),
+				() -> assertThat(logEvents.getFirst().getMDCPropertyMap().get("spanId")).as("span_id")
+					.isNotBlank()
+					.matches("[0-9a-f]{16}"));
+
+		logger.detachAppender(listAppender);
+		listAppender.stop();
+
+	}
 
 }
