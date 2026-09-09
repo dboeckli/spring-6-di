@@ -152,7 +152,3 @@ sbx run opencode --name spring-6-di `
     "C:\development\maven-repo:ro"
 ```
 
-Claude variant (Home): `sbx run claude --name spring-6-di --static-mcp idea --kit "git+https://github.com/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent" -t docker/sandbox-templates:claude-code-docker-0.5.0 "C:\development\projects\spring-6-di" "C:\development\maven-repo:ro"`
-
-> **Sandbox quirk:** Before any `./mvnw` in the sandbox run `export npm_config_bin_links=false` (Spotless/prettier otherwise fails with EPERM on the mounted workspace).
-
