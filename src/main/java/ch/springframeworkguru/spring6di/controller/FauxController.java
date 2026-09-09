@@ -5,13 +5,15 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class FauxController {
-    private final DatasourceService datasourceService;
 
-    public FauxController(DatasourceService datasourceService) {
-        this.datasourceService = datasourceService;
-    }
+	private final DatasourceService datasourceService;
 
-    public String getDatasource() {
-        return datasourceService.getDatasourceName();
-    }
+	public FauxController(DatasourceService datasourceService) {
+		this.datasourceService = datasourceService;
+	}
+
+	public String getDatasource() {
+		return datasourceService.getDatasourceName();
+	}
+
 }

@@ -5,13 +5,13 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
-@Profile({"dev", "default"})
+@Profile({ "dev", "default" })
 @Primary
 public class DatasourceServiceDevImpl implements DatasourceService {
 
-    @Override
-    public String getDatasourceName() {
-        return "dev";
-    }
+	@Override
+	public String getDatasourceName() {
+		return "dev";
+	}
 
 }

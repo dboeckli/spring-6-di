@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 @Service
 @Profile("prod")
 public class DatasourceServiceProdImpl implements DatasourceService {
-    @Override
-    public String getDatasourceName() {
-        return "prod";
-    }
+
+	@Override
+	public String getDatasourceName() {
+		return "prod";
+	}
+
 }
