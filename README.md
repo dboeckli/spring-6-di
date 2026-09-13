@@ -143,11 +143,12 @@ Start (PowerShell) — multiline, with `--static-mcp idea`, pinned template vers
 (no re-download of cached dependencies):
 
 ```powershell
-sbx run opencode --name spring-6-di `
-    --static-mcp idea `
+sbx run opencode `
     --kit "git+https://github.com/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent" `
-    -t docker/sandbox-templates:opencode-docker-0.5.0 `
-    "C:\development\projects\spring-6-di" `
+    --template docker/sandbox-templates:opencode-docker-0.5.0 `
+    --no-share-skills `
+    --static-mcp idea `
+    . `
     "$env:USERPROFILE\.kube:ro" `
     "C:\development\maven-repo:ro"
 ```
