@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 @Profile("qa")
 public class DatasourceServiceQaImpl implements DatasourceService {
 
-	@Override
-	public String getDatasourceName() {
-		return "qa";
-	}
+    @Override
+    public String getDatasourceName() {
+        return "qa";
+    }
 
 }
