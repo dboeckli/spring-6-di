@@ -1,3 +1,0 @@
-### get datasource
-GET http://localhost:{{application-port}}/datasource
-Accept: application/json
