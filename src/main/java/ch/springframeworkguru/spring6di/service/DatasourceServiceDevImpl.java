@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 @Primary
 public class DatasourceServiceDevImpl implements DatasourceService {
 
-	@Override
-	public String getDatasourceName() {
-		return "dev";
-	}
+    @Override
+    public String getDatasourceName() {
+        return "dev";
+    }
 
 }

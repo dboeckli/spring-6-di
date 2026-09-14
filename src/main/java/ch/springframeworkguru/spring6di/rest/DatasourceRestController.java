@@ -10,16 +10,16 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class DatasourceRestController {
 
-	private final DatasourceService datasourceService;
+    private final DatasourceService datasourceService;
 
-	public DatasourceRestController(DatasourceService datasourceService) {
-		this.datasourceService = datasourceService;
-	}
+    public DatasourceRestController(DatasourceService datasourceService) {
+        this.datasourceService = datasourceService;
+    }
 
-	@GetMapping("/datasource")
-	public ResponseEntity<String> getDatasource() {
-		log.info("Datasource requested");
-		return ResponseEntity.ok(datasourceService.getDatasourceName());
-	}
+    @GetMapping("/datasource")
+    public ResponseEntity<String> getDatasource() {
+        log.info("Datasource requested");
+        return ResponseEntity.ok(datasourceService.getDatasourceName());
+    }
 
 }

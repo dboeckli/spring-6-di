@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 @Profile("uat")
 public class DatasourceServiceUatImpl implements DatasourceService {
 
-	@Override
-	public String getDatasourceName() {
-		return "uat";
-	}
+    @Override
+    public String getDatasourceName() {
+        return "uat";
+    }
 
 }
