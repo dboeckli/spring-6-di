@@ -1,137 +1,166 @@
-# Spring 6 Application
+# Spring 6 DI
 
-## Overview
+Spring Boot 4.1.1 / Spring Framework 7 dependency-injection (DI) learning project (Java 25). It demonstrates
+constructor injection and profile-driven bean selection (`@Profile` / `@Primary`) with a small
+`DatasourceService` hierarchy, exposed through Spring MVC and Spring Boot Actuator.
 
-This project is a Spring Boot 4.1.1 (Spring Framework 6) application — a DI learning project.
+## Architecture Overview
+
+```mermaid
+graph LR
+    Client(["💻 Client"])
+
+    subgraph App ["Spring MVC :8080"]
+        REST["DatasourceRestController\nGET /datasource"]
+        FAUX["FauxController"]
+        SVC["DatasourceService\n(interface)"]
+        IMPLS["Profile-specific impls\ndev · qa · uat · prod"]
+        ACT["Actuator\n/actuator/**"]
+    end
+
+    Client <-->|"HTTP"| REST
+    Client -->|"HTTP"| ACT
+    REST --> SVC
+    FAUX --> SVC
+    SVC --> IMPLS
+```
+
+The application has no database and no authentication. The active `DatasourceService` implementation is
+selected purely by the active Spring profile.
 
 ## Prerequisites
 
-- Java 25
-- Maven 3.x
+|    Requirement    | Version  |
+|-------------------|----------|
+| Java              | 25       |
+| Maven Wrapper     | included |
+| Docker            | optional |
+| Kubernetes / Helm | optional |
 
-## Development
+## Profiles
 
-This project uses Spring Boot 4.1.1 and Java 25. It's configured with various plugins and dependencies to support:
-- Actuator for monitoring and managing the application
-- Logbook for HTTP request and response logging
-- Docker image building and publishing
-- Code coverage with JaCoCo
-- Git commit information
+|     Profile     |            Bean             | `GET /datasource` |
+|-----------------|-----------------------------|-------------------|
+| `dev` (default) | `DatasourceServiceDevImpl`  | `dev`             |
+| `qa`            | `DatasourceServiceQaImpl`   | `qa`              |
+| `uat`           | `DatasourceServiceUatImpl`  | `uat`             |
+| `prod`          | `DatasourceServiceProdImpl` | `prod`            |
 
-## Building
+`DatasourceServiceDevImpl` is also `@Primary` and active for the `default` profile (no explicit profile set).
 
-- To build the project: `mvn clean install`
-- To run tests: `mvn test`
-- To build a Docker image: `mvn clean install` is creating a local image
-
-## CI/CD
-
-The project includes a CI/CD profile for GitHub Actions. When activated, it enables Docker image publishing to GitHub Packages and Docker Hub.
-
-## Logging
-
-The application uses Logbook and Logstash for enhanced logging capabilities.
-
-## Deployment
-
-### Deployment with Kubernetes
-
-To run maven filtering for destination target/k8s
+## Build & Test
 
 ```bash
-mvn clean install -DskipTests 
+./mvnw clean verify                              # format check, unit tests, ITs, JaCoCo, Helm lint/template
+./mvnw clean install                             # verify + local Docker image + Helm package
+./mvnw test                                      # unit tests only (surefire, *Test)
+./mvnw verify                                    # integration tests only (failsafe, *IT)
+./mvnw test -Dtest=DatasourceRestControllerIT    # single test class
+./mvnw spotless:apply                            # auto-fix pom/markdown/json/yaml/shell formatting
+./mvnw spring-javaformat:apply                   # auto-fix Java code style
 ```
 
-Deployment goes into the default namespace.
+> Formatting is enforced at the `validate` phase. Run both `spotless:apply` and `spring-javaformat:apply`
+> before committing if the build fails there.
+>
+> **Sandbox quirk:** export `npm_config_bin_links=false` before every `./mvnw` — Spotless (prettier) otherwise
+> fails with `EPERM` on the mounted workspace.
 
-To deploy all resources:
+## Endpoints
+
+|  Resource   |                   Local                   |            Kubernetes (NodePort)             |
+|-------------|-------------------------------------------|----------------------------------------------|
+| Application | http://localhost:8080                     | http://\<node-ip\>:30080                     |
+| Datasource  | http://localhost:8080/datasource          | http://\<node-ip\>:30080/datasource          |
+| Actuator    | http://localhost:8080/actuator            | http://\<node-ip\>:30080/actuator            |
+| Health      | http://localhost:8080/actuator/health     | http://\<node-ip\>:30080/actuator/health     |
+| Prometheus  | http://localhost:8080/actuator/prometheus | http://\<node-ip\>:30080/actuator/prometheus |
+
+## Observability
+
+- **OpenTelemetry tracing** with W3C `traceparent` propagation and baggage (`testBaggage`), correlation of
+  baggage into the MDC.
+- **`@Observed`** (Micrometer) on configuration methods (`config.change.listener`).
+- **Request logging** via `CommonsRequestLoggingFilter` (headers, query string, payload).
+- **Contextual logging**: `ConfigChangeListener` logs all resolved properties on startup (password-like keys and
+  values are masked) and `LogMessage` provides stable log IDs.
+- **Logstash Logback Encoder** for structured JSON logs; the console pattern includes trace/span IDs and a full
+  `MDC` dump.
+
+## IntelliJ HTTP Client
+
+The `restRequest/` folder contains IntelliJ HTTP request files for manual testing:
+
+|           File           |                             Coverage                             |
+|--------------------------|------------------------------------------------------------------|
+| `rest.http`              | `GET /datasource`                                                |
+| `actuator.http`          | Actuator / health endpoints                                      |
+| `scripts/traceparent.js` | Generates `traceId`/`spanId` for `traceparent`/`baggage` headers |
+
+Environments are configured in `restRequest/http-client.env.json`:
+
+| Environment | App port |        Use for        |
+|-------------|----------|-----------------------|
+| `local`     | 8080     | Local run             |
+| `k8s`       | 30080    | Kubernetes (NodePort) |
+
+Select the environment in IntelliJ's HTTP client toolbar before running a request.
+
+## Docker
 
 ```bash
-kubectl apply -f target/k8s/
+./mvnw clean install
+# or explicitly
+./mvnw clean package spring-boot:build-image
 ```
 
-To remove all resources:
+Run the locally built image:
 
 ```bash
-kubectl delete -f target/k8s/
+docker run --rm -p 8080:8080 local/spring-6-di:development
 ```
 
-Check
+## Kubernetes (Helm)
 
-```bash
-kubectl get deployments -o wide
-kubectl get pods -o wide
-```
-
-You can use the actuator rest call to verify via port 30080
-
-### Deployment with Helm
-
-Be aware that we are using a different namespace here (not default).
-
-To run maven filtering for destination target/helm
-
-```bash
-mvn clean install -DskipTests 
-```
-
-Go to the directory where the tgz file has been created after 'mvn install'
+After `./mvnw clean install`, a packaged chart is placed in `target/helm/repo/`. Deployment goes into the
+**`spring-6-di`** namespace.
 
 ```powershell
 cd target/helm/repo
-```
 
-unpack
-
-```powershell
-$file = Get-ChildItem -Filter *.tgz | Select-Object -First 1
+$file = Get-ChildItem -Filter spring-6-di-chart-*.tgz | Select-Object -First 1
 tar -xvf $file.Name
+
+$APPLICATION_NAME = Get-ChildItem -Directory |
+  Where-Object { $_.LastWriteTime -ge $file.LastWriteTime } |
+  Select-Object -ExpandProperty Name
+
+helm upgrade --install $APPLICATION_NAME ./$APPLICATION_NAME `
+  --namespace spring-6-di --create-namespace `
+  --wait --timeout 8m --debug --render-subchart-notes
 ```
 
-install
+### Helm Operations
 
 ```powershell
-$APPLICATION_NAME = Get-ChildItem -Directory | Where-Object { $_.LastWriteTime -ge $file.LastWriteTime } | Select-Object -ExpandProperty Name
-helm upgrade --install $APPLICATION_NAME ./$APPLICATION_NAME --namespace spring-6-di --create-namespace --wait --timeout 5m --debug --render-subchart-notes
-```
-
-show logs
-
-```powershell
-kubectl get pods -l app.kubernetes.io/name=$APPLICATION_NAME -n spring-6-di
-```
-
-replace $POD with pods from the command above
-
-```powershell
-kubectl logs $POD -n spring-6-di --all-containers
-```
-
-test
-
-```powershell
-helm test $APPLICATION_NAME --namespace spring-6-di --logs
-```
-
-uninstall
-
-```powershell
+kubectl get pods -n spring-6-di
+kubectl logs $POD -n spring-6-di --all-containers     # $POD from the command above
+helm status  $APPLICATION_NAME --namespace spring-6-di
+helm test    $APPLICATION_NAME --namespace spring-6-di --logs
 helm uninstall $APPLICATION_NAME --namespace spring-6-di
-```
-
-delete all
-
-```powershell
 kubectl delete all --all -n spring-6-di
 ```
 
-create busybox sidecar
+### Debugging in Kubernetes
 
 ```powershell
-kubectl run busybox-test --rm -it --image=busybox:1.36 --namespace=spring-6-di --command -- sh
+kubectl run busybox-test --rm -it `
+  --image=busybox:1.37.0 `
+  --namespace=spring-6-di `
+  --command -- sh
 ```
 
-You can use the actuator rest call to verify via port 30080
+Verify the application via the actuator endpoint on NodePort **30080**.
 
 ## Sandbox
 
