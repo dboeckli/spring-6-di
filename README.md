@@ -164,7 +164,7 @@ Verify the application via the actuator endpoint on NodePort **30080**.
 
 ## Sandbox
 
-Development in an isolated Docker sandbox via [opencode-sandbox-kit](https://github.com/dboeckli/opencode-sandbox-kit).
+Development in an isolated Docker sandbox via [opencode-sandbox-kit](https://codeberg.org/dboeckli/opencode-sandbox-kit).
 Prerequisites: `sbx` CLI, secrets (`sbx secret set github` + `sbx secret set github-maven`), IntelliJ-MCP registration
 (`sbx mcp add idea --url http://localhost:64615/stream --skip-ssrf-check`).
 
@@ -173,8 +173,8 @@ Start (PowerShell) — multiline, with `--static-mcp idea`, pinned template vers
 
 ```powershell
 sbx run opencode `
-    --kit "git+https://github.com/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent" `
-    --template docker.io/domboeckli/sbx-opencode-tooling:latest `
+    --kit "git+https://codeberg.org/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent" `
+    --template docker.cloudsmith.io/dboeckli/sbx/sbx-opencode-tooling:latest `
     --skills=off `
     --static-mcp idea `
     . `
