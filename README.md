@@ -80,10 +80,8 @@ selected purely by the active Spring profile.
 
 - **OpenTelemetry tracing** with W3C `traceparent` propagation and baggage (`testBaggage`), correlation of
   baggage into the MDC.
-- **`@Observed`** (Micrometer) on configuration methods (`config.change.listener`).
-- **Request logging** via `CommonsRequestLoggingFilter` (headers, query string, payload).
-- **Contextual logging**: `ConfigChangeListener` logs all resolved properties on startup (password-like keys and
-  values are masked) and `LogMessage` provides stable log IDs.
+- **Request logging** via the custom `RequestLoggingFilter` (headers, query string, payload; segment-exact
+  `appconfig.request-logging.exclude-paths`, switchable via `appconfig.request-logging.enabled`).
 - **Logstash Logback Encoder** for structured JSON logs; the console pattern includes trace/span IDs and a full
   `MDC` dump.
 
